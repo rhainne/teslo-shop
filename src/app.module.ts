@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductsModule } from './products/products.module';
 import { EnvConfiguration } from './config/app.config';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -23,6 +24,8 @@ import { EnvConfiguration } from './config/app.config';
     }),
 
     ProductsModule,
+
+    CommonModule,
   ],
 
 })
