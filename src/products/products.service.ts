@@ -7,6 +7,7 @@ import { Product, ProductImage } from './entities';
 import { ConfigService } from '@nestjs/config';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { validate as idUUID } from 'uuid';
+import { User } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -24,7 +25,10 @@ export class ProductsService {
     this.defaultLimit = this.configService.get<number>('defaultLimit', 7);
   }
 
-  async create(createProductDto: CreateProductDto) {
+  async create(
+    createProductDto: CreateProductDto,
+    user: User
+  ) {
     try {
       const { images = [], ...productDetails } = createProductDto;
       const product = this.productsRepository.create({
@@ -32,6 +36,7 @@ export class ProductsService {
         images: images
           .map(image => this.productImagesRepository
             .create({ url: image })),
+        user, // Associate the product with the user who created it
       });
       await this.productsRepository.save(product);
 
@@ -93,7 +98,11 @@ export class ProductsService {
     };
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    user,
+  ) {
     const { images, ...toUpdate } = updateProductDto;
     const product = await this.productsRepository.preload({
       id,
@@ -115,6 +124,9 @@ export class ProductsService {
           this.productImagesRepository.create({ url: image })
         );
       }
+
+      product.user = user; // Update the user who made the change
+
       await queryRunner.manager.save(product);
 
       await queryRunner.commitTransaction();
@@ -146,6 +158,7 @@ export class ProductsService {
     throw new InternalServerErrorException(`Unexpected error:Failed to ${message}`);
   }
 
+  // this method is used in the seed service to clear the products table before seeding new data
   async deleteAllProducts() {
     const query = this.productsRepository.createQueryBuilder('product');
     try {
@@ -153,6 +166,9 @@ export class ProductsService {
         .delete()
         .where({})
         .execute();
+
+      // return await this.dataSource.query(`TRUNCATE TABLE "products" RESTART IDENTITY CASCADE;`);
+
     } catch (error) {
       this.handleException(error, 'delete all products method');
     }
