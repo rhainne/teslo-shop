@@ -25,7 +25,12 @@ export class UserRoleGuard implements CanActivate {
     if (!user)
       throw new InternalServerErrorException('User not found in request context');
 
-    if (user.roles.some(role => validRoles.includes(role)))
+    console.log({ validRoles, userRoles: user.roles });
+
+    if (
+      validRoles.length === 0 ||
+      user.roles.some(role => validRoles.includes(role))
+    )
       return true;
     else
       throw new ForbiddenException(

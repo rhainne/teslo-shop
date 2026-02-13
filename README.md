@@ -4,6 +4,8 @@
 
 # Teslo API
 
+These are the steps to run this project:
+
 1. Clone project
 2. Install dependencies with ```npm install```
 3. Make a ```.env``` file based on ```.env.template``` using real environment variables

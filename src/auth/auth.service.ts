@@ -55,6 +55,13 @@ export class AuthService {
     };
   }
 
+  async checkAuthStatus(user: User) {
+    return {
+      ...user,
+      token: this.getJWToken({ id: user.id })
+    };
+  }
+
   private getJWToken(payload: JwtPayload) {
     return this.jwtService.sign(payload);
   }
