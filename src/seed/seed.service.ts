@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ProductsService } from 'src/products/products.service';
 import { initialData } from './data/seed-data';
-import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/auth/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class SeedService {
   constructor(
     private readonly productsService: ProductsService,
-    private readonly authService: AuthService,
-    // @InjectRepository(User)
-    // private readonly userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) { }
 
   async executeSeed() {
@@ -28,14 +26,16 @@ export class SeedService {
 
   async deleteTables() {
     await this.productsService.deleteAllProducts();
-    await this.authService.deleteAllUsers();
+    await this.userRepository.createQueryBuilder('user')
+      .delete()
+      .where({})
+      .execute();
   }
 
   private async insertUsers() {
     const users = initialData.users;
     const insertPromises = users.map(user =>
-      // this.userRepository.save(this.userRepository.create(user))
-      this.authService.create(user)
+      this.userRepository.save(this.userRepository.create(user))
     );
     await Promise.all(insertPromises);
   }
@@ -46,7 +46,7 @@ export class SeedService {
 
     // insert new seed data
     const products = initialData.products;
-    const users = await this.authService.findAllUsers();
+    const users = await this.userRepository.find();
     const insertPromises =
       products.map(product => {
         const randomCreatorUser = users[Math.floor(Math.random() * users.length)];

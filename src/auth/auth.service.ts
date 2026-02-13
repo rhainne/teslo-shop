@@ -55,12 +55,6 @@ export class AuthService {
     };
   }
 
-  // This method is used in the seed service to retrieve all users for associating them with products
-  // is a pottencial security risk to expose this method in a real application, so it should be used with caution and not exposed in any controller or service that can be accessed by external clients.
-  async findAllUsers() {
-    return this.userRepository.find();
-  }
-
   private getJWToken(payload: JwtPayload) {
     return this.jwtService.sign(payload);
   }
@@ -74,19 +68,6 @@ export class AuthService {
     throw new BadRequestException(
       'An unexpected error occurred while creating the user. Please check server logs. '
     );
-  }
-
-  // this method is used in the seed service to clear the users table before seeding new data
-  async deleteAllUsers() {
-    const query = this.userRepository.createQueryBuilder('user');
-    try {
-      return await query
-        .delete()
-        .where({})
-        .execute();
-    } catch (error) {
-      this.handleDBErrors(error);
-    }
   }
 
 }
