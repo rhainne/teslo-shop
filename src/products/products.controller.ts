@@ -10,13 +10,23 @@ import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Auth, GetUser } from 'src/auth/decorators';
 import { ValidRole } from 'src/auth/enums/valid-roles.enum';
 import { User } from 'src/auth/entities/user.entity';
+import { ApiBearerAuth, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { Product } from './entities';
 
 
 @Controller('products')
+@ApiBearerAuth()
 @Auth()
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
+  @ApiResponse({
+    status: 201,
+    description: 'The product has been successfully created.',
+    type: Product,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 403, description: 'Forbidden. Token related.' })
   @Post()
   create(
     @Body() createProductDto: CreateProductDto,
@@ -31,6 +41,11 @@ export class ProductsController {
   }
 
   @Get(':term')
+  @ApiQuery({
+    name: 'term',
+    description: 'The term to search for. Can be a UUID title or slug.',
+    example: 'scribble_t_logo_onesie',
+  })
   findOne(@Param('term') term: string) {
     return this.productsService.findOnePlain(term);
   }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UseGuards, Req, SetMetadata } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 import { AuthService } from './auth.service';
@@ -8,6 +8,7 @@ import { User } from './entities/user.entity';
 import { GetRawHeaders } from 'src/common/decorators/request-raw-headers.decorator';
 import { UserRoleGuard } from './guards/user-role/user-role.guard';
 import { ValidRole } from './enums/valid-roles.enum';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -15,6 +16,7 @@ export class AuthController {
 
   @Get('testPrivateRoute')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   testingPrivateRoute(
     @GetUser() user: User,
     @GetUser(['email', 'fullName', 'id']) email: string,
@@ -33,6 +35,7 @@ export class AuthController {
   @Get('testPrivateRoute2')
   @RoleProtected(ValidRole.admin) // Custom decorator for roles
   @UseGuards(AuthGuard('jwt'), UserRoleGuard)
+  @ApiBearerAuth()
   testingPrivateRoute2(
     @GetUser() user: User,
   ) {
@@ -45,6 +48,7 @@ export class AuthController {
 
   @Get('testPrivateRoute3')
   @Auth(ValidRole.superUser)
+  @ApiBearerAuth()
   testingPrivateRoute3(
     @GetUser() user: User,
   ) {
@@ -56,6 +60,8 @@ export class AuthController {
   }
 
   @Post('register')
+  @Auth(ValidRole.superUser, ValidRole.admin)
+  @ApiBearerAuth()
   register(@Body() createUserDto: CreateUserDto) {
     return this.authService.create(createUserDto);
   }
@@ -67,6 +73,7 @@ export class AuthController {
 
   @Get('check-status')
   @Auth()
+  @ApiBearerAuth()
   checkAuthStatus(@GetUser() user: User) {
     return this.authService.checkAuthStatus(user);
   }
