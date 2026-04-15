@@ -12,3 +12,6 @@ These are the steps to run this project:
 4. Run database with ``` docker-compose up -d ```
 5. Run application in development using ```npm run start:dev```
 6. Run data generation endpoint ```http://localhost:3000/api/seed```
+
+#### API Documentation
+- ```.../api/swagger```
