@@ -20,6 +20,8 @@ async function bootstrap() {
     })
   );
 
+  app.enableCors();
+
   const config = new DocumentBuilder()
     .setTitle('Teslo Shop API')
     .setDescription('The Teslo Shop API description')
